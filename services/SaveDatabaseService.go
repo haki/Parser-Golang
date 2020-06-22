@@ -1,12 +1,12 @@
 package services
 
 import (
+	"Parser-Golang/db"
+	"Parser-Golang/models"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego/logs"
 	"net/http"
-	"parser/db"
-	"parser/models"
 	"strconv"
 	"strings"
 	"time"
@@ -28,7 +28,7 @@ func SaveData(comp string) {
 		nameTexts := strings.Split(name, "|")
 		slug := strings.Replace(sourcePage, "https://stackshare.io/stackups/", "", -1)
 
-		comparison := models.Comparison{
+		comparison := &models.Comparison{
 			Name:       nameTexts[0],
 			Slug:       slug,
 			View:       0,
@@ -40,7 +40,7 @@ func SaveData(comp string) {
 	}
 }
 
-func SetStack(document *goquery.Document, comparison models.Comparison) {
+func SetStack(document *goquery.Document, comparison *models.Comparison) {
 	db.Conn.Create(&comparison)
 	db.Conn.Where(&models.Comparison{Slug: comparison.Slug}).First(&comparison)
 	document.Find("div.css-x7ngfe a.css-1ogs1nl").Each(func(i int, stackItem *goquery.Selection) {

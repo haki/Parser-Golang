@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"Parser-Golang/db"
+	"Parser-Golang/models"
+	"Parser-Golang/services"
+	"fmt"
 	"github.com/astaxie/beego"
-	"parser/models"
-	"parser/services"
 	"strings"
 )
 
@@ -27,4 +29,30 @@ func (c *RestApiController) UpdateData() {
 	c.ServeJSON()
 }
 
+func (c *RestApiController) LiveSearch() {
+	fmt.Println("Helloggggggg")
 
+	var AllStacks []models.Stack
+	db.Conn.Find(&AllStacks)
+
+	var ResultStacks []services.Stack
+
+	StackName := c.Ctx.Input.Param(":StackName")
+	StackName = strings.ToLower(StackName)
+	k := 0
+	for i := 0; i < len(AllStacks); i++ {
+		if len(StackName) >= 1 && strings.Index(strings.ToLower(AllStacks[i].Name), StackName) != -1 && k != 15 {
+			stack := services.Stack{
+				Name:  AllStacks[i].Name,
+				Slug:  AllStacks[i].Slug,
+				Image: AllStacks[i].Image,
+			}
+
+			ResultStacks = append(ResultStacks, stack)
+			k++
+		}
+	}
+
+	c.Data["json"] = ResultStacks
+	c.ServeJSON()
+}

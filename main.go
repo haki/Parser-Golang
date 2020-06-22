@@ -1,18 +1,20 @@
 package main
 
 import (
+	"Parser-Golang/db"
+	_ "Parser-Golang/routers"
+	"Parser-Golang/services"
+	"Parser-Golang/utilities"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"os"
-	"parser/db"
-	_ "parser/routers"
-	"parser/services"
 )
 
 func main() {
+	RegisterTemplateFuncs()
 	getProxyConnection()
 	conn := getDBConnection()
 	defer conn.Close()
@@ -20,6 +22,11 @@ func main() {
 	//scheduler.Every().Sunday().At("08:30").Run(UpdateComparison)
 
 	beego.Run("localhost:8080")
+}
+
+func RegisterTemplateFuncs() {
+	beego.AddFuncMap("IfNotZero", utilities.IfNotZero)
+	beego.AddFuncMap("GetFirstWord", utilities.GetFirstWord)
 }
 
 func UpdateComparison() {

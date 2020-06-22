@@ -1,8 +1,8 @@
 package services
 
 import (
-	"parser/db"
-	"parser/models"
+	"Parser-Golang/db"
+	"Parser-Golang/models"
 	"strings"
 )
 

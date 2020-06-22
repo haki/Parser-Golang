@@ -1,10 +1,10 @@
 package db
 
 import (
+	"Parser-Golang/models"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"parser/models"
 )
 
 var Conn *gorm.DB
