@@ -333,13 +333,13 @@ img {
     transform: translateY(-50%)
 }
 
-.section-title ul {
+.section-title .section-ul {
     padding: 0;
     margin: 8px 0 0;
     list-style-type: none
 }
 
-.section-title ul li {
+.section-title .section-ul li {
     display: inline-block;
     position: relative;
     margin: 0 15px;
@@ -348,7 +348,7 @@ img {
     font-weight: 600
 }
 
-.section-title ul li::before {
+.section-title .section-ul li::before {
     content: '';
     position: absolute;
     left: -22px;
@@ -360,7 +360,7 @@ img {
     border-radius: 50%
 }
 
-.section-title ul li:first-child::before {
+.section-title .section-ul li:first-child::before {
     display: none
 }
 
@@ -721,3 +721,27 @@ img {
 .single-demo.coming-soon .image img {
     filter: blur(1.5px)
 }
+
+#result {
+    /* Remove default list styling */
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#result li a {
+    border: 1px solid #ddd; /* Add a border to all links */
+    margin-top: -1px; /* Prevent double borders */
+    background-color: #f6f6f6; /* Grey background color */
+    padding: 12px; /* Add some padding */
+    text-decoration: none; /* Remove default text underline */
+    font-size: 18px; /* Increase the font-size */
+    color: black; /* Add a black text color */
+    display: block; /* Make it into a block element to fill the whole list */
+}
+
+#result li a:hover:not(.header) {
+    background-color: #eee; /* Add a hover effect to all links, except for headers */
+}
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600');

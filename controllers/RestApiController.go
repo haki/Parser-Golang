@@ -4,7 +4,6 @@ import (
 	"Parser-Golang/db"
 	"Parser-Golang/models"
 	"Parser-Golang/services"
-	"fmt"
 	"github.com/astaxie/beego"
 	"strings"
 )
@@ -23,15 +22,7 @@ func (c *RestApiController) GetComparisonStack() {
 	c.ServeJSON()
 }
 
-func (c *RestApiController) UpdateData() {
-	services.UpdateData()
-	c.Data["json"] = "OK!"
-	c.ServeJSON()
-}
-
 func (c *RestApiController) LiveSearch() {
-	fmt.Println("Helloggggggg")
-
 	var AllStacks []models.Stack
 	db.Conn.Find(&AllStacks)
 

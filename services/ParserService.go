@@ -8,7 +8,17 @@ import (
 
 func Parser(comp string) *Comparison {
 	var find = false
+	find, comp = CheckComparison(comp)
 
+	if !find {
+		SaveData(comp)
+	}
+
+	return ParseFromDatabase(comp)
+}
+
+func CheckComparison(comp string) (bool, string) {
+	find := false
 	slug := strings.Split(comp, "-vs-")
 	for i := 0; i < len(slug); i++ {
 		var stack models.Stack
@@ -23,11 +33,7 @@ func Parser(comp string) *Comparison {
 		}
 	}
 
-	if !find {
-		SaveData(comp)
-	}
-
-	return ParseFromDatabase(comp)
+	return find, comp
 }
 
 func CheckComparisonWith2Stacks(slug []string) (bool, string) {

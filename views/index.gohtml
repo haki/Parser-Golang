@@ -2,47 +2,91 @@
     <div class="container">
         <div class="section-title">
             <h2>Customize your comparison</h2>
-            <br>
-            <!--Blue select-->
-            <form class="form-inline md-form mr-auto mb-4" style="text-align: center; display: inline-block">
-                <input id="search0" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-                <b class="mr-sm-2"> VS </b>
-                <input id="search1" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-                <b class="mr-sm-2"> VS </b>
-                <input id="search2" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-                <input class="btn btn-primary" type="button" value="Compare">
-                <ul class="card-text" style="max-height: 300px; overflow: auto" id="result"></ul>
-            </form>
             <span class="section-title-bg">Customize</span>
+            <br>
+            <br><br>
+            <!--Blue select-->
+            <form class="form-inline md-form mr-auto mb-4" id="findComparison" action="/search/comparison" method="post" style="text-align: center; display: inline-block">
+                <input required id="search0" class="form-control mr-sm-2" name="stack0" type="text" placeholder="Add tool"
+                       aria-label="Search">
+                <b class="mr-sm-2"> VS </b>
+                <input required id="search1" class="form-control mr-sm-2" name="stack1" type="text" placeholder="Add tool"
+                       aria-label="Search">
+                <b class="mr-sm-2"> VS </b>
+                <input id="search2" class="form-control mr-sm-2" name="stack2" type="text" placeholder="Add tool"
+                       aria-label="Search">
+                <input class="btn btn-primary" type="submit" value="Compare">
+                <ul style="max-height: 300px; overflow: auto" id="result"></ul>
+            </form>
         </div>
-
 
         <div class="section-title">
             <h2>Comparisons</h2>
             <span class="section-title-bg">Comparisons</span>
-        </div>
-        <div class="row">
-            {{range $comparison := .TopComparisons}}
-                <div class="col-lg-4" style="text-align: center;">
-                    <a href="/comparisons/{{$comparison.Slug}}">
-                        <table class="table card-table table-vcenter single-features">
-                            <tbody>
-                            <tr>
-                                {{range $k, $stack := $comparison.Stacks}}
-                                    {{if $k | IfNotZero}}
-                                        <td><b style="padding-right: .4rem!important;">vs</b></td>
-                                    {{end}}
-                                    <td><img src="{{$stack.Image}}" alt="{{$stack.Slug}}" style="max-width: 20%">
-                                        <br><br>
-                                        <p class="card-subtitle">{{$stack.Name | GetFirstWord}}</p></td>
-                                    </td>
-                                {{end}}
-                            </tr>
-                            </tbody>
-                        </table>
-                    </a>
+            <br>
+            <nav>
+                <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-top-tab" data-toggle="tab" href="#TopComparisons"
+                       role="tab" aria-controls="nav-top" aria-selected="true">Top</a>
+                    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#NewComparisons"
+                       role="tab" aria-controls="nav-new" aria-selected="false">New</a>
                 </div>
-            {{end}}
+            </nav>
+        </div>
+
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="TopComparisons" role="tabpanel" aria-labelledby="nav-home-tab">
+                <div class="row">
+                    {{range $comparison := .TopComparisons}}
+                        <div class="col-lg-4" style="text-align: center;">
+                            <a href="/comparisons/{{$comparison.Slug}}">
+                                <table class="table card-table table-vcenter single-features">
+                                    <tbody>
+                                    <tr>
+                                        {{range $k, $stack := $comparison.Stacks}}
+                                            {{if $k | IfNotZero}}
+                                                <td><b style="padding-right: .4rem!important;">vs</b></td>
+                                            {{end}}
+                                            <td><img src="{{$stack.Image}}" alt="{{$stack.Slug}}"
+                                                     style="max-width: 20%">
+                                                <br><br>
+                                                <p class="card-subtitle">{{$stack.Name | GetFirstWord}}</p></td>
+                                            </td>
+                                        {{end}}
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </a>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="NewComparisons" role="tabpanel" aria-labelledby="nav-profile-tab">
+                <div class="row">
+                    {{range $comparison := .NewComparisons}}
+                        <div class="col-lg-4" style="text-align: center;">
+                            <a href="/comparisons/{{$comparison.Slug}}">
+                                <table class="table card-table table-vcenter single-features">
+                                    <tbody>
+                                    <tr>
+                                        {{range $k, $stack := $comparison.Stacks}}
+                                            {{if $k | IfNotZero}}
+                                                <td><b style="padding-right: .4rem!important;">vs</b></td>
+                                            {{end}}
+                                            <td><img src="{{$stack.Image}}" alt="{{$stack.Slug}}"
+                                                     style="max-width: 20%">
+                                                <br><br>
+                                                <p class="card-subtitle">{{$stack.Name | GetFirstWord}}</p></td>
+                                            </td>
+                                        {{end}}
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </a>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
         </div>
     </div>
 </div>

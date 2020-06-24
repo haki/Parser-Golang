@@ -15,25 +15,21 @@ import (
 
 func main() {
 	RegisterTemplateFuncs()
-	getProxyConnection()
 	conn := getDBConnection()
 	defer conn.Close()
-
-	//scheduler.Every().Sunday().At("08:30").Run(UpdateComparison)
+	if getProxyConnection() {
+		//scheduler.Every(5).Hours().Run(UpdateComparison)
+		//scheduler.Every().Sunday().At("08:30").Run(UpdateComparison)
+	}
 
 	beego.Run("localhost:8080")
-}
-
-func RegisterTemplateFuncs() {
-	beego.AddFuncMap("IfNotZero", utilities.IfNotZero)
-	beego.AddFuncMap("GetFirstWord", utilities.GetFirstWord)
 }
 
 func UpdateComparison() {
 	services.UpdateData()
 }
 
-func getProxyConnection() {
+func getProxyConnection() bool {
 	var user = "DLcGHY"
 	var password = "ucAWpv"
 	var address = "91.188.242.138"
@@ -44,8 +40,11 @@ func getProxyConnection() {
 	_, err := http.Get("https://stackshare.io")
 
 	if err != nil {
-		logs.Error("Proxy Error")
+		logs.Warn("Proxy Error!")
+		return false
 	}
+
+	return true
 }
 
 func getDBConnection() *gorm.DB {
@@ -60,4 +59,12 @@ func getDBConnection() *gorm.DB {
 	}
 
 	return conn
+}
+
+func RegisterTemplateFuncs() {
+	beego.AddFuncMap("IfNotZero", utilities.IfNotZero)
+	beego.AddFuncMap("GetFirstWord", utilities.GetFirstWord)
+	beego.AddFuncMap("PreloadStackPros", utilities.PreloadStackPros)
+	beego.AddFuncMap("PreloadStackCons", utilities.PreloadStackCons)
+	beego.AddFuncMap("PreloadStackCompanies", utilities.PreloadStackCompanies)
 }

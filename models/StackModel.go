@@ -9,7 +9,7 @@ type Stack struct {
 	Slug        string       `gorm:"type:varchar(100);not null;unique"`
 	Description string       `gorm:"type:varchar(1000);"`
 	Image       string       `gorm:"type:varchar(450)"`
-	GithubUrl   string       `gorm:"type:varchar(350)"`
+	GitUrl      string       `gorm:"type:varchar(350)"`
 	Fork        string       `gorm:"type:varchar(150)"`
 	Star        string       `gorm:"type:varchar(150)"`
 	Watch       string       `gorm:"type:varchar(150)"`
