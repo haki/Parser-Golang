@@ -10,6 +10,7 @@ func init() {
 	beego.Router("/comparisons/:comp", &controllers.MainController{}, "get:DetailsPage")
 	beego.Router("/update/comment/point", &controllers.ComparisonController{}, "get:UpdatePoint")
 	beego.Router("/search/comparison", &controllers.ComparisonController{}, "post:FindComparison")
+	beego.Router("/add/comment", &controllers.ComparisonController{}, "post:AddNewComment")
 
 	beego.Router("/api/comparisons/:comp", &controllers.RestApiController{}, "get:GetComparisonStack")
 	beego.Router("/api/livesearch/:StackName", &controllers.RestApiController{}, "get:LiveSearch")

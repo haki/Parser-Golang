@@ -54,16 +54,26 @@
                 {{$stack = $stack.Slug | PreloadStackPros}}
                 <div class="col-lg-4 col-sm-6">
                     <div class="single-features" style="text-align: left; height: 500px; overflow: auto;">
+                        <form class="form-inline" method="post" action="/add/comment">
+                            <input type="hidden" name="state" value="pros">
+                            <input type="hidden" name="stackSlug" value="{{$stack.Slug}}">
+                            <input type="text" name="comment" class="form-control mb-2 mr-sm-2"
+                                   id="inlineFormInputName2" placeholder="Add a pro">
+                            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                        </form>
                         <h3 class="card-title" style="text-align: center">Pros of {{$stack.Name}}</h3>
                         <br>
                         {{range $i, $pros := $stack.Pros}}
-                            <input type="hidden" id="prosId{{$k}}{{$i}}" name="id" value="{{$pros.ID}}">
-                            <button id="prosButton{{$k}}{{$i}}" type="submit" onclick="UpdateProsPoint({{$k}}, {{$i}})"
-                                    class="btn btn-primary">
-                                <span>{{$pros.Point}}</span>
-                            </button>
-                            <span id="prosText{{$k}}{{$i}}" style="padding-left: 10px">{{$pros.Text}}</span>
-                            <br><br>
+                            {{if $pros.Enabled}}
+                                <input type="hidden" id="prosId{{$k}}{{$i}}" name="id" value="{{$pros.ID}}">
+                                <button id="prosButton{{$k}}{{$i}}" type="submit"
+                                        onclick="UpdateProsPoint({{$k}}, {{$i}})"
+                                        class="btn btn-primary">
+                                    <span>{{$pros.Point}}</span>
+                                </button>
+                                <span id="prosText{{$k}}{{$i}}" style="padding-left: 10px">{{$pros.Text}}</span>
+                                <br><br>
+                            {{end}}
                         {{end}}
                     </div>
                 </div>
@@ -75,16 +85,26 @@
                 {{$stack = $stack.Slug | PreloadStackCons}}
                 <div class="col-lg-4 col-sm-6">
                     <div class="single-features" style="text-align: left;height: 500px; overflow: auto;">
+                        <form class="form-inline" method="post" action="/add/comment">
+                            <input type="hidden" name="state" value="cons">
+                            <input type="hidden" name="stackSlug" value="{{$stack.Slug}}">
+                            <input type="text" name="comment" class="form-control mb-2 mr-sm-2"
+                                   id="inlineFormInputName2" placeholder="Add a con">
+                            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                        </form>
                         <h3 class="card-title" style="text-align: center">Cons of {{$stack.Name}}</h3>
                         <br>
                         {{range $i, $cons := $stack.Cons}}
-                            <input type="hidden" id="consId{{$k}}{{$i}}" name="id" value="{{$cons.ID}}">
-                            <button id="consButton{{$k}}{{$i}}" type="submit" onclick="UpdateConsPoint({{$k}}, {{$i}})"
-                                    class="btn btn-primary">
-                                <span>{{$cons.Point}}</span>
-                            </button>
-                            <span id="consText{{$k}}{{$i}}" style="padding-left: 10px">{{$cons.Text}}</span>
-                            <br><br>
+                            {{if $cons.Enabled}}
+                                <input type="hidden" id="consId{{$k}}{{$i}}" name="id" value="{{$cons.ID}}">
+                                <button id="consButton{{$k}}{{$i}}" type="submit"
+                                        onclick="UpdateConsPoint({{$k}}, {{$i}})"
+                                        class="btn btn-primary">
+                                    <span>{{$cons.Point}}</span>
+                                </button>
+                                <span id="consText{{$k}}{{$i}}" style="padding-left: 10px">{{$cons.Text}}</span>
+                                <br><br>
+                            {{end}}
                         {{end}}
                     </div>
                 </div>

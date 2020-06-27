@@ -64,3 +64,39 @@ func (c *ComparisonController) UpdatePoint() {
 	c.Data["json"] = "ok"
 	c.ServeJSON()
 }
+
+func (c *ComparisonController) AddNewComment() {
+	type FormComment struct {
+		Comment   string `form:"comment"`
+		State     string `form:"state"`
+		StackSlug string `form:"stackSlug"`
+	}
+
+	var formComment FormComment
+
+	if err := c.ParseForm(&formComment); err == nil {
+		var stack models.Stack
+		db.Conn.Where(&models.Stack{Slug: formComment.StackSlug}).First(&stack)
+		if formComment.State == "pros" {
+			newComment := models.Pros{
+				Text:    formComment.Comment,
+				Point:   0,
+				Enabled: false,
+			}
+
+			db.Conn.Model(&stack).Association("Pros").Append(&newComment)
+
+		} else if formComment.State == "cons" {
+			newComment := models.Cons{
+				Text:    formComment.Comment,
+				Point:   0,
+				Enabled: false,
+			}
+
+			db.Conn.Model(&stack).Association("Cons").Append(&newComment)
+		}
+	}
+
+	c.Data["json"] = "OK"
+	c.ServeJSON()
+}
