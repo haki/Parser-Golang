@@ -51,10 +51,10 @@ func getProxyConnection() bool {
 }
 
 func getDBConnection() *gorm.DB {
-	dbUser := "osmanlie_hakan"
-	dbPass := "13399771Hm"
-	dbName := "osmanlie_local"
-	dbHost := "192.185.73.49"
+	dbUser := "user"
+	dbPass := "password"
+	dbName := "db"
+	dbHost := "localhost"
 
 	conn, err := db.Connection(dbUser, dbPass, dbName, dbHost)
 	if err != nil {
