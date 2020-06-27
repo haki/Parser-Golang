@@ -18,7 +18,14 @@ var stack []models.Stack
 func (c *RestApiController) GetComparisonStack() {
 	var comp = c.Ctx.Input.Param(":comp")
 
-	c.Data["json"] = services.Parser(strings.ToLower(comp))
+	var find bool
+	comp, find = services.Parser(comp)
+	if find {
+		c.Data["json"] = services.ParseFromDatabase(comp)
+	} else {
+		c.Data["json"] = "Can't Found"
+	}
+
 	c.ServeJSON()
 }
 

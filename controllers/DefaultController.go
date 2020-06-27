@@ -26,24 +26,18 @@ func (c *MainController) Get() {
 func (c *MainController) DetailsPage() {
 	comparisonSlug := c.Ctx.Input.Param(":comp")
 
-	find := false
-	find, comparisonSlug = services.CheckComparison(comparisonSlug)
-
+	var find bool
+	comparisonSlug, find = services.Parser(comparisonSlug)
 	if find {
+		UpdateView(comparisonSlug)
 		var comparison models.Comparison
 		db.Conn.Preload("Stacks").Where(&models.Comparison{Slug: comparisonSlug}).First(&comparison)
-		UpdateView(comparisonSlug)
 
 		c.Data["Comparison"] = comparison
 
 		c.TplName = "detailsPage.gohtml"
 	} else {
-		services.SaveData(comparisonSlug)
-		if db.Conn.Where(&models.Comparison{Slug: comparisonSlug}).First(&models.Comparison{}).Error == nil {
-			c.Redirect("/comparisons/"+comparisonSlug, 303)
-		} else {
-			c.Redirect("/", 303)
-		}
+		c.Redirect("/", 303)
 	}
 }
 

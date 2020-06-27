@@ -6,15 +6,20 @@ import (
 	"strings"
 )
 
-func Parser(comp string) *Comparison {
+func Parser(comp string) (string, bool) {
+
 	var find = false
 	find, comp = CheckComparison(comp)
 
 	if !find {
-		SaveData(comp)
+		if SaveData(comp) {
+			return comp, true
+		}
+	} else {
+		return comp, true
 	}
 
-	return ParseFromDatabase(comp)
+	return comp, false
 }
 
 func CheckComparison(comp string) (bool, string) {
@@ -22,11 +27,15 @@ func CheckComparison(comp string) (bool, string) {
 	slug := strings.Split(comp, "-vs-")
 	for i := 0; i < len(slug); i++ {
 		var stack models.Stack
-		if db.Conn.Where(&models.Stack{Slug: slug[i]}).First(&stack).Error == nil && !find {
-			if len(slug) == 2 {
-				find, comp = CheckComparisonWith2Stacks(slug)
-			} else if len(slug) == 3 {
-				find, comp = CheckComparisonWith3Stacks(slug)
+		if db.Conn.Where(&models.Stack{Slug: slug[i]}).First(&stack).Error == nil {
+			if !find {
+				if len(slug) == 2 {
+					find, comp = CheckComparisonWith2Stacks(slug)
+				} else if len(slug) == 3 {
+					find, comp = CheckComparisonWith3Stacks(slug)
+				}
+			} else {
+				break
 			}
 		} else {
 			break
@@ -42,12 +51,13 @@ func CheckComparisonWith2Stacks(slug []string) (bool, string) {
 		for l := 0; l < len(slug); l++ {
 			compSlug := slug[k] + "-vs-" + slug[l]
 			if db.Conn.Where(&models.Comparison{Slug: compSlug}).First(&comparison).Error == nil {
-				return true, compSlug
+				return true, comparison.Slug
 			}
 		}
 	}
 
 	compSlug := slug[0] + "-vs-" + slug[1]
+
 	return false, compSlug
 }
 
@@ -58,12 +68,12 @@ func CheckComparisonWith3Stacks(slug []string) (bool, string) {
 			for m := 0; m < len(slug); m++ {
 				compSlug := slug[k] + "-vs-" + slug[l] + "-vs-" + slug[m]
 				if db.Conn.Where(&models.Comparison{Slug: compSlug}).First(&comparison).Error == nil {
-					return true, compSlug
+					return true, comparison.Slug
 				}
 			}
 		}
 	}
 
-	compSlug := slug[0] + "-vs" + slug[1] + "-vs-" + slug[2]
+	compSlug := slug[0] + "-vs-" + slug[1] + "-vs-" + slug[2]
 	return false, compSlug
 }

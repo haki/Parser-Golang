@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func UpdateData() {
+func AddNewComparisons() {
 	logs.Info("Update Started.")
 	url := []string{"https://stackshare.io/stackups/trending", "https://stackshare.io/stackups/top", "https://stackshare.io/stackups/new"}
 	for i := 0; i < len(url); i++ {
@@ -24,10 +24,10 @@ func UpdateData() {
 			if db.Conn.Where(&models.Comparison{Slug: slug}).Find(&models.Comparison{}).Error != nil {
 				logs.Info("Parsing From " + slug + "...")
 				SaveData(slug)
-				DeleteComparisonIfHasOneStack(slug)
 				logs.Info(slug + " saved with success.")
 			}
 		})
+		DeleteComparisonIfHasProblem()
 		response.Body.Close()
 	}
 
@@ -47,10 +47,10 @@ func UpdateData() {
 			if db.Conn.Where(&models.Comparison{Slug: slug}).Find(&models.Comparison{}).Error != nil {
 				logs.Info("Parsing from " + slug + "...")
 				SaveData(slug)
-				DeleteComparisonIfHasOneStack(slug)
 				logs.Info(slug + " saved with success.")
 			}
 		})
+		DeleteComparisonIfHasProblem()
 
 		response.Body.Close()
 	}
@@ -59,15 +59,46 @@ func UpdateData() {
 }
 
 func UpdateGitData() {
+	var stack []models.Stack
+	db.Conn.Find(&stack)
 
+	for i := 0; i < len(stack); i++ {
+		if strings.Index(stack[i].GitUrl, "github") != -1 {
+			response, _ := http.Get(stack[i].GitUrl)
+			document, _ := goquery.NewDocumentFromReader(response.Body)
+
+			n := 0
+			var data [3]string
+			document.Find("ul.pagehead-actions li").Each(func(k int, selection *goquery.Selection) {
+				fields := strings.Fields(selection.Find("a.social-count").Text())
+				if len(fields) >= 1 {
+					data[n] = fields[0]
+					n++
+				}
+				if n == 3 {
+					stack[i].Watch = data[0]
+					stack[i].Star = data[1]
+					stack[i].Fork = data[2]
+					db.Conn.Save(&stack[i])
+					n = 0
+				}
+			})
+
+			response.Body.Close()
+		}
+	}
+
+	logs.Info("Update successfully completed! Git up to date.")
 }
 
-func DeleteComparisonIfHasOneStack(slug string) {
-	var comparison models.Comparison
-	if db.Conn.Where(&models.Comparison{Slug: slug}).Find(&comparison).Error == nil {
-		if db.Conn.Model(&comparison).Association("Stacks").Count() <= 1 {
-			db.Conn.Model(&comparison).Association("Stacks").Delete()
-			db.Conn.Unscoped().Delete(&comparison)
+func DeleteComparisonIfHasProblem() {
+	var comparison []models.Comparison
+	db.Conn.Find(&comparison)
+
+	for i := 0; i < len(comparison); i++ {
+		if db.Conn.Model(&comparison[i]).Association("Stacks").Count() <= 1 || comparison[i].SourcePage == "https://stackshare.io/stackups/trending" {
+			db.Conn.Model(&comparison[i]).Association("Stacks").Delete()
+			db.Conn.Unscoped().Delete(&comparison[i])
 		}
 	}
 }

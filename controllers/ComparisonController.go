@@ -32,18 +32,14 @@ func (c *ComparisonController) FindComparison() {
 		}
 	}
 
-	find := false
-	find, createdSlug = services.CheckComparison(strings.ToLower(strings.Replace(createdSlug, " ", "-", -1)))
+	createdSlug = strings.ToLower(strings.Replace(createdSlug, " ", "-", -1))
+	var find bool
+	createdSlug, find = services.Parser(createdSlug)
 	if find {
 		c.Redirect("/comparisons/"+createdSlug, 303)
 	} else {
-		services.SaveData(createdSlug)
-		if db.Conn.Where(&models.Comparison{Slug: createdSlug}).Find(&models.Comparison{}).Error == nil {
-			c.Redirect("/comparisons/"+createdSlug, 303)
-		}
+		c.Redirect("/", 303)
 	}
-
-	c.Redirect("/", 303)
 }
 
 func (c *ComparisonController) UpdatePoint() {

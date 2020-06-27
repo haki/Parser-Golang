@@ -5,51 +5,44 @@ import (
 	"Parser-Golang/models"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/astaxie/beego/logs"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
-func SaveData(comp string) {
-	response, err := http.Get("https://stackshare.io/stackups/" + comp)
-	time.Sleep(3600 * time.Millisecond)
-
-	if err != nil {
-		return
-	}
-
+func SaveData(comp string) bool {
+	response, _ := http.Get("https://stackshare.io/stackups/" + comp)
 	if response.StatusCode != 200 {
-		logs.Error("Status Code Error: " + response.Status)
-		return
+		return false
 	} else {
 		document, _ := goquery.NewDocumentFromReader(response.Body)
 		defer response.Body.Close()
 
-		sourcePage, _ := document.Find("link").Attr("href")
-		if sourcePage == "https://stackshare.io/stackups/trending" {
-			return
-		}
+		title := strings.Split(document.Find("title").Text(), " | ")
+		name := title[0]
 
-		name := document.Find("title").Text()
-		nameTexts := strings.Split(name, "|")
-		slug := strings.Replace(sourcePage, "https://stackshare.io/stackups/", "", -1)
+		var slug string
+		document.Find("link").Each(func(i int, selection *goquery.Selection) {
+			canonical, _ := selection.Attr("rel")
+			if canonical == "canonical" {
+				slug, _ = selection.Attr("href")
+			}
+		})
 
 		comparison := &models.Comparison{
-			Name:       nameTexts[0],
-			Slug:       slug,
+			Name:       name,
+			Slug:       strings.Replace(slug, "https://stackshare.io/stackups/", "", -1),
 			View:       0,
-			SourcePage: sourcePage,
-			Stacks:     []models.Stack{},
+			SourcePage: slug,
 		}
 
-		if sourcePage != "https://stackshare.io/stackups/trending" {
+		if slug != "https://stackshare.io/stackups/trending" {
 			SetStack(document, comparison)
-		} else {
-			return
+			return true
 		}
 	}
+
+	return false
 }
 
 func SetStack(document *goquery.Document, comparison *models.Comparison) {

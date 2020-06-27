@@ -3,7 +3,6 @@ package main
 import (
 	"Parser-Golang/db"
 	_ "Parser-Golang/routers"
-	"Parser-Golang/services"
 	"Parser-Golang/utilities"
 	"fmt"
 	"github.com/astaxie/beego"
@@ -18,15 +17,16 @@ func main() {
 	conn := getDBConnection()
 	defer conn.Close()
 	if getProxyConnection() {
-		//scheduler.Every(5).Hours().Run(UpdateComparison)
-		//scheduler.Every().Sunday().At("08:30").Run(UpdateComparison)
+		RegisterSchedulerFuncs()
 	}
 
 	beego.Run("localhost:8080")
 }
 
-func UpdateComparison() {
-	services.UpdateData()
+func RegisterSchedulerFuncs() {
+	//scheduler.Every().Sunday().At("02:30").Run(services.AddNewComparisons)
+	//scheduler.Every(1).Hours().Run(services.DeleteComparisonIfHasProblem)
+	//scheduler.Every().Day().At("00:01").Run(services.UpdateGitData)
 }
 
 func getProxyConnection() bool {
