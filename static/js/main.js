@@ -134,8 +134,6 @@ function UpdateProsPoint(n, m) {
         type: 'GET',
         url: Url,
     });
-
-    window.location.href = window.location.href
 }
 
 function UpdateConsPoint(n, m) {
@@ -151,6 +149,4 @@ function UpdateConsPoint(n, m) {
         type: 'GET',
         url: Url,
     });
-
-    window.location.href = window.location.href
 }

@@ -3,12 +3,10 @@ package main
 import (
 	"Parser-Golang/db"
 	_ "Parser-Golang/routers"
-	"Parser-Golang/services"
 	"Parser-Golang/utilities"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/carlescere/scheduler"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"os"
@@ -26,7 +24,6 @@ func main() {
 }
 
 func RegisterSchedulerFuncs() {
-	scheduler.Every(5).Hours().Run(services.AddNewComparisons)
 	//scheduler.Every().Sunday().At("02:30").Run(services.AddNewComparisons)
 	//scheduler.Every(1).Hours().Run(services.DeleteComparisonIfHasProblem)
 	//scheduler.Every().Day().At("00:01").Run(services.UpdateGitData)

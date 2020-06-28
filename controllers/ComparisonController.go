@@ -67,9 +67,10 @@ func (c *ComparisonController) UpdatePoint() {
 
 func (c *ComparisonController) AddNewComment() {
 	type FormComment struct {
-		Comment   string `form:"comment"`
-		State     string `form:"state"`
-		StackSlug string `form:"stackSlug"`
+		ComparisonSlug string `form:"comparisonSlug"`
+		Comment        string `form:"comment"`
+		State          string `form:"state"`
+		StackSlug      string `form:"stackSlug"`
 	}
 
 	var formComment FormComment
@@ -97,6 +98,5 @@ func (c *ComparisonController) AddNewComment() {
 		}
 	}
 
-	c.Data["json"] = "OK"
-	c.ServeJSON()
+	c.Redirect("/comparisons/"+formComment.ComparisonSlug, 302)
 }

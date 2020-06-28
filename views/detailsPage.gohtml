@@ -50,11 +50,13 @@
         </div>
 
         <div class="row justify-content-center" id="prosRow">
+            {{$compSlug := .Comparison.Slug}}
             {{range $k, $stack := .Comparison.Stacks}}
                 {{$stack = $stack.Slug | PreloadStackPros}}
                 <div class="col-lg-4 col-sm-6">
                     <div class="single-features" style="text-align: left; height: 500px; overflow: auto;">
                         <form class="form-inline" method="post" action="/add/comment">
+                            <input type="hidden" name="comparisonSlug" value="{{$compSlug}}">
                             <input type="hidden" name="state" value="pros">
                             <input type="hidden" name="stackSlug" value="{{$stack.Slug}}">
                             <input type="text" name="comment" class="form-control mb-2 mr-sm-2"
@@ -86,6 +88,7 @@
                 <div class="col-lg-4 col-sm-6">
                     <div class="single-features" style="text-align: left;height: 500px; overflow: auto;">
                         <form class="form-inline" method="post" action="/add/comment">
+                            <input type="hidden" name="comparisonSlug" value="{{$compSlug}}">
                             <input type="hidden" name="state" value="cons">
                             <input type="hidden" name="stackSlug" value="{{$stack.Slug}}">
                             <input type="text" name="comment" class="form-control mb-2 mr-sm-2"
