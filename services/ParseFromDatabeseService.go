@@ -5,16 +5,6 @@ import (
 	"Parser-Golang/models"
 )
 
-type Github struct {
-	Star  string `json:"star"`
-	Forks string `json:"forks"`
-	Watch string `json:"watch"`
-}
-
-type Stats struct {
-	Github Github `json:"github"`
-}
-
 type Pros struct {
 	Text  string `json:"text"`
 	Point int    `json:"point"`
@@ -36,7 +26,10 @@ type Stack struct {
 	Slug        string    `json:"slug"`
 	Image       string    `json:"image"`
 	Description string    `json:"description"`
-	Stats       Stats     `json:"stats"`
+	GitUrl      string    `json:"git_url"`
+	Star        string    `json:"star"`
+	Fork        string    `json:"fork"`
+	Watch       string    `json:"watch"`
 	Pros        []Pros    `json:"pros"`
 	Const       []Const   `json:"const"`
 	Companies   []Company `json:"companies"`
@@ -46,20 +39,22 @@ type Comparison struct {
 	Source     string  `json:"source"`
 	SourcePage string  `json:"source_page"`
 	Name       string  `json:"name"`
+	Slug       string  `json:"slug"`
 	Stacks     []Stack `json:"stacks"`
 }
 
-func ParseFromDatabase(comp string) *Comparison {
+func ParseFromDatabase(comp string) Comparison {
 	var comparison models.Comparison
 	db.Conn.Where(models.Comparison{Slug: comp}).First(&comparison)
 
 	var stacks []models.Stack
 	db.Conn.Model(&comparison).Association("Stacks").Find(&stacks)
 
-	jsonData := &Comparison{
+	jsonPComparison := &Comparison{
 		Source:     "localhost:8080",
 		SourcePage: "http://localhost:8080/" + comp,
-		Name:       comp,
+		Name:       comparison.Name,
+		Slug:       comparison.Slug,
 		Stacks:     []Stack{},
 	}
 
@@ -69,16 +64,13 @@ func ParseFromDatabase(comp string) *Comparison {
 			Slug:        stacks[i].Slug,
 			Image:       stacks[i].Image,
 			Description: stacks[i].Description,
-			Stats: Stats{
-				Github: Github{
-					Star:  stacks[i].Star,
-					Forks: stacks[i].Fork,
-					Watch: stacks[i].Watch,
-				},
-			},
-			Pros:      []Pros{},
-			Const:     []Const{},
-			Companies: []Company{},
+			GitUrl:      stacks[i].GitUrl,
+			Star:        stacks[i].Star,
+			Fork:        stacks[i].Fork,
+			Watch:       stacks[i].Watch,
+			Pros:        []Pros{},
+			Const:       []Const{},
+			Companies:   []Company{},
 		}
 
 		var pros []models.Pros
@@ -118,10 +110,44 @@ func ParseFromDatabase(comp string) *Comparison {
 			AddCompany(newCompany, stack)
 		}
 
-		AddStack(stack, jsonData)
+		AddStack(stack, jsonPComparison)
+	}
+
+	jsonData := Comparison{
+		Source:     jsonPComparison.Source,
+		SourcePage: jsonPComparison.SourcePage,
+		Name:       jsonPComparison.Name,
+		Slug:       jsonPComparison.Slug,
+		Stacks:     jsonPComparison.Stacks,
 	}
 
 	return jsonData
+}
+
+func TopComparisons() [15]Comparison {
+	var topComparisons []models.Comparison
+	db.Conn.Preload("Stacks").Order("view desc").Limit(15).Find(&topComparisons)
+
+	var jsonTopComparisons [15]Comparison
+
+	for i := 0; i < len(topComparisons); i++ {
+		jsonTopComparisons[i] = ParseFromDatabase(topComparisons[i].Slug)
+	}
+
+	return jsonTopComparisons
+}
+
+func NewComparisons() [15]Comparison {
+	var newComparisons []models.Comparison
+	db.Conn.Preload("Stacks").Order("id desc").Limit(15).Find(&newComparisons)
+
+	var jsonNewComparisons [15]Comparison
+
+	for i := 0; i < len(newComparisons); i++ {
+		jsonNewComparisons[i] = ParseFromDatabase(newComparisons[i].Slug)
+	}
+
+	return jsonNewComparisons
 }
 
 func AddCompany(company Company, stack *Stack) []Company {
@@ -145,7 +171,10 @@ func AddStack(stack *Stack, comparison *Comparison) []Stack {
 		Slug:        stack.Slug,
 		Image:       stack.Image,
 		Description: stack.Description,
-		Stats:       stack.Stats,
+		Star:        stack.Star,
+		GitUrl:      stack.GitUrl,
+		Fork:        stack.Fork,
+		Watch:       stack.Watch,
 		Pros:        stack.Pros,
 		Const:       stack.Const,
 		Companies:   stack.Companies,

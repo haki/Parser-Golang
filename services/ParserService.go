@@ -12,7 +12,8 @@ func Parser(comp string) (string, bool) {
 	find, comp = CheckComparison(comp)
 
 	if !find {
-		if SaveData(comp) {
+		find, comp = SaveData(comp)
+		if find {
 			return comp, true
 		}
 	} else {

@@ -12,9 +12,6 @@ type RestApiController struct {
 	beego.Controller
 }
 
-var comparison models.Comparison
-var stack []models.Stack
-
 func (c *RestApiController) GetComparisonStack() {
 	var comp = c.Ctx.Input.Param(":comp")
 
@@ -22,11 +19,11 @@ func (c *RestApiController) GetComparisonStack() {
 	comp, find = services.Parser(comp)
 	if find {
 		c.Data["json"] = services.ParseFromDatabase(comp)
+		c.ServeJSON()
 	} else {
-		c.Data["json"] = "Can't Found"
+		c.Data["json"] = "Can't Find!"
+		c.ServeJSON()
 	}
-
-	c.ServeJSON()
 }
 
 func (c *RestApiController) LiveSearch() {

@@ -4,6 +4,8 @@ import (
 	"Parser-Golang/db"
 	"Parser-Golang/models"
 	"Parser-Golang/services"
+	"github.com/PuerkitoBio/goquery"
+	"net/http"
 )
 
 type MainController struct {
@@ -11,14 +13,8 @@ type MainController struct {
 }
 
 func (c *MainController) Get() {
-	var allComparisons []models.Comparison
-	db.Conn.Preload("Stacks").Order("view desc").Limit(15).Find(&allComparisons)
-
-	var lastCreatedComparisons []models.Comparison
-	db.Conn.Preload("Stacks").Order("id desc").Limit(15).Find(&lastCreatedComparisons)
-
-	c.Data["TopComparisons"] = allComparisons
-	c.Data["NewComparisons"] = lastCreatedComparisons
+	c.Data["TopComparisons"] = services.TopComparisons()
+	c.Data["NewComparisons"] = services.NewComparisons()
 
 	c.TplName = "index.gohtml"
 }
@@ -26,18 +22,19 @@ func (c *MainController) Get() {
 func (c *MainController) DetailsPage() {
 	comparisonSlug := c.Ctx.Input.Param(":comp")
 
+	response, _ := http.Get("http://localhost:8080/api/comparisons/" + comparisonSlug)
+	document, _ := goquery.NewDocumentFromReader(response.Body)
+	if document.Text() == "\"Can't Find!\"" {
+		response.Body.Close()
+		c.Redirect("/", 303)
+	}
+
+	response.Body.Close()
 	var find bool
 	comparisonSlug, find = services.Parser(comparisonSlug)
 	if find {
-		UpdateView(comparisonSlug)
-		var comparison models.Comparison
-		db.Conn.Preload("Stacks").Where(&models.Comparison{Slug: comparisonSlug}).First(&comparison)
-
-		c.Data["Comparison"] = comparison
-
+		c.Data["Comparison"] = services.ParseFromDatabase(comparisonSlug)
 		c.TplName = "detailsPage.gohtml"
-	} else {
-		c.Redirect("/", 303)
 	}
 }
 

@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-func SaveData(comp string) bool {
+func SaveData(comp string) (bool, string) {
 	response, _ := http.Get("https://stackshare.io/stackups/" + comp)
 	if response.StatusCode != 200 {
-		return false
+		return false, comp
 	} else {
 		document, _ := goquery.NewDocumentFromReader(response.Body)
 		defer response.Body.Close()
@@ -38,11 +38,11 @@ func SaveData(comp string) bool {
 
 		if slug != "https://stackshare.io/stackups/trending" {
 			SetStack(document, comparison)
-			return true
+			return true, comparison.Slug
 		}
 	}
 
-	return false
+	return false, comp
 }
 
 func SetStack(document *goquery.Document, comparison *models.Comparison) {
@@ -54,7 +54,6 @@ func SetStack(document *goquery.Document, comparison *models.Comparison) {
 		slug = strings.Replace(slug, "/", "", -1)
 		image, _ := stackItem.Find("img").Attr("src")
 
-		db.Conn.Where(&models.Stack{Slug: slug}).First(&models.Stack{})
 		if err := db.Conn.Where(&models.Stack{Slug: slug}).First(&models.Stack{}).Error; err != nil {
 			stack := models.Stack{
 				Name:        name,
