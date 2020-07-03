@@ -3,7 +3,6 @@ package services
 import (
 	"Parser-Golang/db"
 	"Parser-Golang/models"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"strconv"
@@ -12,75 +11,71 @@ import (
 
 func SaveData(comp string) (bool, string) {
 	response, _ := http.Get("https://stackshare.io/stackups/" + comp)
-	if response.StatusCode != 200 {
-		return false, comp
-	} else {
-		document, _ := goquery.NewDocumentFromReader(response.Body)
-		defer response.Body.Close()
+	document, _ := goquery.NewDocumentFromReader(response.Body)
+	defer response.Body.Close()
 
-		title := strings.Split(document.Find("title").Text(), " | ")
-		name := title[0]
+	names := strings.Split(document.Find("title").Text(), " | ")
+	name := names[0]
 
-		var slug string
-		document.Find("link").Each(func(i int, selection *goquery.Selection) {
-			canonical, _ := selection.Attr("rel")
-			if canonical == "canonical" {
-				slug, _ = selection.Attr("href")
-			}
-		})
+	sourcePage, _ := document.Find("link").Attr("href")
+	slug := strings.Replace(sourcePage, "https://stackshare.io/stackups/", "", -1)
 
-		comparison := &models.Comparison{
+	var comparison models.Comparison
+	if !(strings.Index(sourcePage, "trending") != -1) && db.Conn.Where(&models.Comparison{Slug: slug}).First(&comparison).Error != nil {
+		comparison = models.Comparison{
 			Name:       name,
-			Slug:       strings.Replace(slug, "https://stackshare.io/stackups/", "", -1),
+			Slug:       slug,
 			View:       0,
-			SourcePage: slug,
+			SourcePage: sourcePage,
+		}
+		db.Conn.Create(&comparison)
+
+		slugs := strings.Split(comparison.Slug, "-vs-")
+
+		for i := 0; i < len(slugs); i++ {
+			var stack models.Stack
+			if db.Conn.Where(&models.Stack{Slug: slugs[i]}).First(&stack).Error != nil {
+				stackResponse, _ := http.Get("https://stackshare.io/" + slugs[i])
+				stackDocument, _ := goquery.NewDocumentFromReader(stackResponse.Body)
+
+				stack = models.Stack{
+					Name:        GetName(stackDocument),
+					Slug:        slugs[i],
+					Description: GetDescription(stackDocument),
+					Image:       GetImage(stackDocument, document, comparison.Name),
+					Website:     GetWebsite(stackDocument),
+					GitUrl:      GetGitUrl(stackDocument),
+					Fork:        "",
+					Star:        "",
+					Watch:       "",
+					Comparisons: nil,
+					Companies:   nil,
+					Cons:        nil,
+					Pros:        nil,
+				}
+
+				db.Conn.Model(&comparison).Association("Stacks").Append(&stack)
+
+				SetPros(document, stack.Name, stack.Slug)
+				SetCons(document, stack.Name, stack.Slug)
+				SetCompany(document, stack.Name, stack.Slug)
+
+				stackResponse.Body.Close()
+			} else {
+				db.Conn.Model(&comparison).Association("Stacks").Append(&stack)
+			}
 		}
 
-		if slug != "https://stackshare.io/stackups/trending" {
-			SetStack(document, comparison)
-			return true, comparison.Slug
-		}
+		return true, comparison.Slug
 	}
 
 	return false, comp
 }
 
-func SetStack(document *goquery.Document, comparison *models.Comparison) {
-	db.Conn.Create(&comparison)
-	db.Conn.Where(&models.Comparison{Slug: comparison.Slug}).First(&comparison)
-	document.Find("div.css-x7ngfe a.css-1ogs1nl").Each(func(i int, stackItem *goquery.Selection) {
-		name := stackItem.Find("div").Text()
-		slug, _ := stackItem.Attr("href")
-		slug = strings.Replace(slug, "/", "", -1)
-		image, _ := stackItem.Find("img").Attr("src")
+func GetGitUrl(stackDocument *goquery.Document) string {
+	href, _ := stackDocument.Find(".css-mgyi0p .css-ii8qy4 .css-12i35kv .css-1mjw833 .css-a5x1lt .css-1xqysy6 .css-17xwoxe a").Attr("href")
 
-		if err := db.Conn.Where(&models.Stack{Slug: slug}).First(&models.Stack{}).Error; err != nil {
-			stack := models.Stack{
-				Name:        name,
-				Slug:        slug,
-				Description: GetDescription(i, document),
-				Image:       image,
-				GitUrl:      GetGitUrl(i, document),
-			}
-
-			if optional := db.Conn.Where(&models.Stack{Slug: slug}).First(&models.Stack{}).Error; optional == nil {
-				var optionalStack models.Stack
-				db.Conn.Where(&models.Stack{Slug: slug}).First(&optionalStack)
-				db.Conn.Model(&comparison).Association("Stacks").Append(&optionalStack)
-			} else {
-				db.Conn.Model(&comparison).Association("Stacks").Append(&stack)
-			}
-
-			SetCompany(document, name, slug)
-			SetPros(document, name, slug)
-			SetCons(document, name, slug)
-
-		} else {
-			var stack models.Stack
-			db.Conn.Where(&models.Stack{Slug: slug}).First(&stack)
-			db.Conn.Model(&comparison).Association("Stacks").Append(&stack)
-		}
-	})
+	return href
 }
 
 func SetCons(document *goquery.Document, name string, slug string) {
@@ -181,33 +176,39 @@ func SetCompany(document *goquery.Document, name string, slug string) {
 	})
 }
 
-func GetGitUrl(n int, document *goquery.Document) string {
-	var data string
-
-	document.Find("div.css-3vlw85").Each(func(i int, selection *goquery.Selection) {
-		dataNotes, _ := selection.Attr("data-notes")
-		index := fmt.Sprintf("index %d num 3 offset 0", n)
-		if dataNotes == index {
-			githubUrl, find := selection.Find("a.css-1hlwa6q").Attr("href")
-			if find {
-				data = githubUrl
-			}
-		}
-	})
-
-	return data
-}
-
-func GetDescription(n int, document *goquery.Document) string {
+func GetDescription(stackDocument *goquery.Document) string {
 	var description string
-	document.Find("div.css-3vlw85").Each(func(i int, selection *goquery.Selection) {
-		dataNotes, _ := selection.Attr("data-notes")
-		index := fmt.Sprintf("index %d num 3 offset 0", n)
-
-		if dataNotes == index && strings.Index(selection.Find("h2.css-i52n91").Text(), "What is") != -1 {
-			description = selection.Find("div.css-nil div.css-13sfqhu").Text()
+	stackDocument.Find(".css-mgyi0p .css-ii8qy4 .css-z9c3fl .css-1gs0ko2 .css-1t7lufe .css-1nbl3qb .css-nil").Each(func(i int, selection *goquery.Selection) {
+		if strings.Index(selection.Find(".css-i52n91").Text(), "What is ") != -1 {
+			description = selection.Find(".css-13sfqhu").First().Text()
 		}
 	})
 
 	return description
+}
+
+func GetName(stackDocument *goquery.Document) string {
+	return stackDocument.Find(".css-1cylxxa	").Text()
+}
+
+func GetWebsite(stackDocument *goquery.Document) string {
+	website, _ := stackDocument.Find(".css-mgyi0p .css-ii8qy4 .css-12i35kv .css-1mjw833 .css-a5x1lt a").Attr("href")
+
+	return website
+}
+
+func GetImage(stackDocument *goquery.Document, document *goquery.Document, name string) string {
+	image, _ := stackDocument.Find(".css-1m5j888").Attr("src")
+
+	if len(image) <= 22 {
+		document.Find(".css-1ogs1nl").Each(func(i int, selection *goquery.Selection) {
+			alt, _ := selection.Find("img").Attr("alt")
+			if strings.Index(alt, name) != -1 {
+				img, _ := selection.Find("img").Attr("src")
+				image = img
+			}
+		})
+	}
+
+	return image
 }

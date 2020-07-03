@@ -45,10 +45,9 @@
                                     <tr>
                                         {{range $k, $stack := $comparison.Stacks}}
                                             {{if $k | IfNotZero}}
-                                                <td><b style="padding-right: .4rem!important;">vs</b></td>
+                                                <td style="width: 2%"><b style="padding-right: .4rem!important;">vs</b></td>
                                             {{end}}
-                                            <td><img src="{{$stack.Image}}" alt="{{$stack.Slug}}"
-                                                     style="max-width: 43px; max-height: 43px;">
+                                            <td style="height: 110px; width: 32%"><img src="{{$stack.Image}}" alt="{{$stack.Slug}}" style="width: 25%">
                                                 <br><br>
                                                 <p class="card-subtitle">{{$stack.Name | GetFirstWord}}</p></td>
                                             </td>
@@ -71,10 +70,9 @@
                                     <tr>
                                         {{range $k, $stack := $comparison.Stacks}}
                                             {{if $k | IfNotZero}}
-                                                <td><b style="padding-right: .4rem!important;">vs</b></td>
+                                                <td style="width: 2%"><b style="padding-right: .4rem!important;">vs</b></td>
                                             {{end}}
-                                            <td><img src="{{$stack.Image}}" alt="{{$stack.Slug}}"
-                                                     style="max-width: 43px; max-height: 43px;">
+                                            <td style="height: 110px; width: 32%"><img src="{{$stack.Image}}" alt="{{$stack.Slug}}" style="width: 25%">
                                                 <br><br>
                                                 <p class="card-subtitle">{{$stack.Name | GetFirstWord}}</p></td>
                                             </td>

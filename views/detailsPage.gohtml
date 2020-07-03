@@ -8,7 +8,7 @@
             {{range $stack := .Comparison.Stacks}}
                 <div class="col-lg-4 col-sm-6">
                     <div class="single-features">
-                        <img alt="{{$stack.Slug}}" src="{{$stack.Image}}">
+                        <img style="max-height: 200px; max-width: 200px" alt="{{$stack.Slug}}" src="{{$stack.Image}}">
                         <h3>{{$stack.Name}}</h3>
                         <br><br>
                         <a href="{{$stack.GitUrl}}">

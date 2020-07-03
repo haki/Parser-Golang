@@ -3,7 +3,6 @@ package controllers
 import (
 	"Parser-Golang/db"
 	"Parser-Golang/models"
-	"Parser-Golang/services"
 	"github.com/astaxie/beego"
 	"strconv"
 	"strings"
@@ -20,26 +19,20 @@ func (c *ComparisonController) FindComparison() {
 		ThirdStack  string `form:"stack2"`
 	}
 
-	var createdSlug string
-	var Stacks FindComparison
-	if err := c.ParseForm(&Stacks); err == nil {
-		if Stacks.FirstStack != "" && Stacks.SecondStack != "" {
-			if Stacks.ThirdStack != "" {
-				createdSlug = Stacks.FirstStack + "-vs-" + Stacks.SecondStack + "-vs-" + Stacks.ThirdStack
-			} else {
-				createdSlug = Stacks.FirstStack + "-vs-" + Stacks.SecondStack
-			}
+	var findComparison FindComparison
+	var comparisonSlug string
+	if err := c.ParseForm(&findComparison); err == nil {
+		comparisonSlug = findComparison.FirstStack + "-vs-" + findComparison.SecondStack
+		if findComparison.ThirdStack != "" {
+			comparisonSlug = comparisonSlug + "-vs-" + findComparison.ThirdStack
 		}
+		comparisonSlug = strings.Replace(comparisonSlug, " ", "-", -1)
+		comparisonSlug = strings.Replace(comparisonSlug, ".", "", -1)
+		comparisonSlug = strings.ToLower(comparisonSlug)
+		c.Redirect("/comparisons/"+comparisonSlug, 303)
 	}
 
-	createdSlug = strings.ToLower(strings.Replace(createdSlug, " ", "-", -1))
-	var find bool
-	createdSlug, find = services.Parser(createdSlug)
-	if find {
-		c.Redirect("/comparisons/"+createdSlug, 303)
-	} else {
-		c.Redirect("/", 303)
-	}
+	c.Redirect("/", 303)
 }
 
 func (c *ComparisonController) UpdatePoint() {

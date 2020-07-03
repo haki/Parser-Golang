@@ -14,8 +14,10 @@ func AddNewComparisons() {
 	logs.Info("Update Started.")
 	url := []string{"https://stackshare.io/stackups/trending", "https://stackshare.io/stackups/top", "https://stackshare.io/stackups/new"}
 	for i := 0; i < len(url); i++ {
-		time.Sleep(3600 * time.Millisecond)
+		time.Sleep(3660 * time.Millisecond)
 		response, _ := http.Get(url[i])
+		time.Sleep(3600 * time.Millisecond)
+
 		document, _ := goquery.NewDocumentFromReader(response.Body)
 
 		document.Find("div.grid-item a").Each(func(i int, comparisons *goquery.Selection) {
@@ -27,7 +29,6 @@ func AddNewComparisons() {
 				logs.Info(slug + " saved with success.")
 			}
 		})
-		DeleteComparisonIfHasProblem()
 		response.Body.Close()
 	}
 
@@ -38,8 +39,9 @@ func AddNewComparisons() {
 	for i := 0; i < len(AllStacks); i++ {
 
 		logs.Info("Getting to " + AllStacks[i].Slug)
-		time.Sleep(3600 * time.Millisecond)
 		response, _ := http.Get("https://stackshare.io/" + AllStacks[i].Slug)
+		time.Sleep(3600 * time.Millisecond)
+
 		document, _ := goquery.NewDocumentFromReader(response.Body)
 		document.Find("div.css-nuwf1p div.css-13zfms0 div.css-1rmabp8 a").Each(func(k int, selection *goquery.Selection) {
 			slug, _ := selection.Attr("href")
@@ -50,7 +52,6 @@ func AddNewComparisons() {
 				logs.Info(slug + " saved with success.")
 			}
 		})
-		DeleteComparisonIfHasProblem()
 
 		response.Body.Close()
 	}
@@ -91,14 +92,10 @@ func UpdateGitData() {
 	logs.Info("Update successfully completed! Git up to date.")
 }
 
-func DeleteComparisonIfHasProblem() {
-	var comparison []models.Comparison
-	db.Conn.Find(&comparison)
+func UpdateView(slug string) {
+	var comparison models.Comparison
+	db.Conn.Where(&models.Comparison{Slug: slug}).First(&comparison)
 
-	for i := 0; i < len(comparison); i++ {
-		if db.Conn.Model(&comparison[i]).Association("Stacks").Count() <= 1 || comparison[i].SourcePage == "https://stackshare.io/stackups/trending" {
-			db.Conn.Model(&comparison[i]).Association("Stacks").Delete()
-			db.Conn.Unscoped().Delete(&comparison[i])
-		}
-	}
+	comparison.View = comparison.View + 1
+	db.Conn.Save(&comparison)
 }

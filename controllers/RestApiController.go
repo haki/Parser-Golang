@@ -19,11 +19,9 @@ func (c *RestApiController) GetComparisonStack() {
 	comp, find = services.Parser(comp)
 	if find {
 		c.Data["json"] = services.ParseFromDatabase(comp)
-		c.ServeJSON()
-	} else {
-		c.Data["json"] = "Can't Find!"
-		c.ServeJSON()
 	}
+
+	c.ServeJSON()
 }
 
 func (c *RestApiController) LiveSearch() {

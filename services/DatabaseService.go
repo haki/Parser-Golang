@@ -30,6 +30,7 @@ type Stack struct {
 	Star        string    `json:"star"`
 	Fork        string    `json:"fork"`
 	Watch       string    `json:"watch"`
+	Website     string    `json:"website"`
 	Pros        []Pros    `json:"pros"`
 	Const       []Const   `json:"const"`
 	Companies   []Company `json:"companies"`
@@ -68,6 +69,7 @@ func ParseFromDatabase(comp string) Comparison {
 			Star:        stacks[i].Star,
 			Fork:        stacks[i].Fork,
 			Watch:       stacks[i].Watch,
+			Website:     stacks[i].Website,
 			Pros:        []Pros{},
 			Const:       []Const{},
 			Companies:   []Company{},
@@ -113,13 +115,7 @@ func ParseFromDatabase(comp string) Comparison {
 		AddStack(stack, jsonPComparison)
 	}
 
-	jsonData := Comparison{
-		Source:     jsonPComparison.Source,
-		SourcePage: jsonPComparison.SourcePage,
-		Name:       jsonPComparison.Name,
-		Slug:       jsonPComparison.Slug,
-		Stacks:     jsonPComparison.Stacks,
-	}
+	jsonData := *jsonPComparison
 
 	return jsonData
 }
@@ -166,20 +162,8 @@ func AddCons(stackItem Const, stack *Stack) []Const {
 }
 
 func AddStack(stack *Stack, comparison *Comparison) []Stack {
-	ItemStack := Stack{
-		Name:        stack.Name,
-		Slug:        stack.Slug,
-		Image:       stack.Image,
-		Description: stack.Description,
-		Star:        stack.Star,
-		GitUrl:      stack.GitUrl,
-		Fork:        stack.Fork,
-		Watch:       stack.Watch,
-		Pros:        stack.Pros,
-		Const:       stack.Const,
-		Companies:   stack.Companies,
-	}
-	comparison.Stacks = append(comparison.Stacks, ItemStack)
+	item := *stack
+	comparison.Stacks = append(comparison.Stacks, item)
 
 	return comparison.Stacks
 }
