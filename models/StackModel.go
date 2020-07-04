@@ -7,7 +7,7 @@ type Stack struct {
 
 	Name        string       `gorm:"type:varchar(100)"`
 	Slug        string       `gorm:"type:varchar(100);not null;unique"`
-	Description string       `gorm:"type:varchar(500);"`
+	Description string       `gorm:"type:varchar(550);"`
 	Image       string       `gorm:"type:varchar(255)"`
 	Website     string       `gorm:"type:varchar(255)"`
 	GitUrl      string       `gorm:"type:varchar(255)"`
