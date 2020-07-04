@@ -17,17 +17,10 @@ func main() {
 	conn := getDBConnection()
 	defer conn.Close()
 	if getProxyConnection() {
-		RegisterSchedulerFuncs()
+		utilities.RegisterSchedulerFuncs()
 	}
 
 	beego.Run("localhost:8080")
-}
-
-func RegisterSchedulerFuncs() {
-	//scheduler.Every(5).Hours().Run(services.AddNewComparisons)
-	//scheduler.Every().Sunday().At("02:30").Run(services.AddNewComparisons)
-	//scheduler.Every(1).Hours().Run(services.DeleteComparisonIfHasProblem)
-	//scheduler.Every().Day().At("00:01").Run(services.UpdateGitData)
 }
 
 func getProxyConnection() bool {

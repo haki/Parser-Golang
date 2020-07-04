@@ -5,6 +5,7 @@ import (
 	"Parser-Golang/models"
 	"Parser-Golang/services"
 	"github.com/astaxie/beego"
+	"net/http"
 	"strings"
 )
 
@@ -19,6 +20,8 @@ func (c *RestApiController) GetComparisonStack() {
 	comp, find = services.Parser(comp)
 	if find {
 		c.Data["json"] = services.ParseFromDatabase(comp)
+	} else {
+		c.Data["json"] = http.StatusNotFound
 	}
 
 	c.ServeJSON()

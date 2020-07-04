@@ -32,8 +32,6 @@ func AddNewComparisons() {
 		response.Body.Close()
 	}
 
-	time.Sleep(5 * time.Minute)
-
 	var AllStacks []models.Stack
 	db.Conn.Find(&AllStacks)
 	for i := 0; i < len(AllStacks); i++ {
@@ -55,6 +53,8 @@ func AddNewComparisons() {
 
 		response.Body.Close()
 	}
+
+	UpdateGitData()
 
 	logs.Info("Update successfully completed! All comparisons is up to date.")
 }
