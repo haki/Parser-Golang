@@ -9,8 +9,6 @@ type MainController struct {
 }
 
 func (c *MainController) Get() {
-	services.UpdateGitData()
-
 	c.Data["TopComparisons"] = services.TopComparisons()
 	c.Data["NewComparisons"] = services.NewComparisons()
 
