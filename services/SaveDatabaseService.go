@@ -57,9 +57,9 @@ func SetStack(comparison models.Comparison, document *goquery.Document) {
 				Image:       GetImage(document, stackDocument, slugs[i]),
 				Website:     GetWebsite(stackDocument),
 				GitUrl:      GetGitUrl(document, stackDocument, slugs[i]),
-				Fork:        "",
-				Star:        "",
-				Watch:       "",
+				Fork:        0,
+				Star:        0,
+				Watch:       0,
 				Comparisons: nil,
 				Companies:   nil,
 				Cons:        nil,
@@ -68,12 +68,31 @@ func SetStack(comparison models.Comparison, document *goquery.Document) {
 
 			db.Conn.Model(&comparison).Association("Stacks").Append(&stack)
 
+			if strings.Index(stack.GitUrl, "github") != -1 {
+				UpdateGithubData(&stack)
+			}
+
 			SetPros(document, stack.Name, stack.Slug)
 			SetCons(document, stack.Name, stack.Slug)
 			SetCompany(document, stack.Name, stack.Slug)
 
 			stackResponse.Body.Close()
 		} else {
+			if stack.Name == "" {
+				stackResponse, _ := http.Get("https://stackshare.io/" + stack.Slug)
+				stackDocument, _ := goquery.NewDocumentFromReader(stackResponse.Body)
+				stack.Name = GetName(document, stackDocument, stack.Slug)
+				stack.Description = GetDescription(document, stackDocument, stack.Name)
+				stack.Image = GetImage(document, stackDocument, stack.Slug)
+				stack.Website = GetWebsite(stackDocument)
+				stack.GitUrl = GetGitUrl(document, stackDocument, stack.Slug)
+				db.Conn.Save(&stack)
+			}
+
+			if strings.Index(stack.GitUrl, "github") != -1 {
+				UpdateGithubData(&stack)
+			}
+
 			db.Conn.Model(&comparison).Association("Stacks").Append(&stack)
 		}
 	}

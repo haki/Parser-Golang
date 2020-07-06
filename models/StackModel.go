@@ -7,13 +7,14 @@ type Stack struct {
 
 	Name        string       `gorm:"type:varchar(100)"`
 	Slug        string       `gorm:"type:varchar(100);not null;unique"`
-	Description string       `gorm:"type:varchar(550);"`
+	Description string       `gorm:"type:text;"`
 	Image       string       `gorm:"type:varchar(255)"`
 	Website     string       `gorm:"type:varchar(255)"`
+	View        int64        `gorm:"type:int;default:0;"`
 	GitUrl      string       `gorm:"type:varchar(255)"`
-	Fork        string       `gorm:"type:varchar(150)"`
-	Star        string       `gorm:"type:varchar(150)"`
-	Watch       string       `gorm:"type:varchar(150)"`
+	Fork        int          `gorm:"type:varchar(150)"`
+	Star        int          `gorm:"type:varchar(150)"`
+	Watch       int          `gorm:"type:varchar(150)"`
 	Comparisons []Comparison `gorm:"many2many:comparison_stacks"`
 	Companies   []Company    `gorm:"many2many:stack_companies"`
 	Cons        []Cons       `gorm:"many2many:stack_cons"`

@@ -137,6 +137,45 @@
 <script src="/static/js/particles.js"></script>
 <!-- Main JS -->
 <script src="/static/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+{{if .detail}}
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'bar',
+
+            // The data for our dataset
+            data: {
+                {{$labels := .Comparison.Slug | ChartLabels}}
+                labels: {{$labels}},
+                datasets: [
+                    {
+                        label: 'View',
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        {{$data := .Comparison.Slug | ChartData}}
+                        data: {{$data}},
+                    },
+                ]
+            },
+
+            // Configuration options go here
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                title: {
+                    display: true,
+                    text: {{.Comparison.Name}}
+                }
+            }
+        });
+    </script>
+{{end}}
 
 <style type="text/css">.typewrite > .wrap {
         border-right: 0.08em solid #fff

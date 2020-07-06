@@ -27,9 +27,9 @@ type Stack struct {
 	Image       string    `json:"image"`
 	Description string    `json:"description"`
 	GitUrl      string    `json:"git_url"`
-	Star        string    `json:"star"`
-	Fork        string    `json:"fork"`
-	Watch       string    `json:"watch"`
+	Star        int       `json:"star"`
+	Fork        int       `json:"fork"`
+	Watch       int       `json:"watch"`
 	Website     string    `json:"website"`
 	Pros        []Pros    `json:"pros"`
 	Const       []Const   `json:"const"`

@@ -3,8 +3,10 @@ package services
 import (
 	"Parser-Golang/db"
 	"Parser-Golang/models"
+	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego/logs"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -60,36 +62,41 @@ func AddNewComparisons() {
 }
 
 func UpdateGitData() {
-	var stack []models.Stack
-	db.Conn.Find(&stack)
+	logs.Info("Git Update Started.")
+	var stacks []models.Stack
+	db.Conn.Find(&stacks)
 
-	for i := 0; i < len(stack); i++ {
-		if strings.Index(stack[i].GitUrl, "github") != -1 {
-			response, _ := http.Get(stack[i].GitUrl)
-			document, _ := goquery.NewDocumentFromReader(response.Body)
-
-			n := 0
-			var data [3]string
-			document.Find("ul.pagehead-actions li").Each(func(k int, selection *goquery.Selection) {
-				fields := strings.Fields(selection.Find("a.social-count").Text())
-				if len(fields) >= 1 {
-					data[n] = fields[0]
-					n++
-				}
-				if n == 3 {
-					stack[i].Watch = data[0]
-					stack[i].Star = data[1]
-					stack[i].Fork = data[2]
-					db.Conn.Save(&stack[i])
-					n = 0
-				}
-			})
-
-			response.Body.Close()
+	for i := 0; i < len(stacks); i++ {
+		if strings.Index(stacks[i].GitUrl, "github") != -1 {
+			time.Sleep(3 * time.Second)
+			UpdateGithubData(&stacks[i])
 		}
 	}
 
 	logs.Info("Update successfully completed! Git up to date.")
+}
+
+func UpdateGithubData(stack *models.Stack) {
+	type GitHub struct {
+		ForksCount       int `json:"forks_count"`
+		SubscribersCount int `json:"subscribers_count"`
+		StargazersCount  int `json:"stargazers_count"`
+	}
+
+	gitUrl := strings.Replace(stack.GitUrl, "https://github.com/", "https://api.github.com/repos/", -1)
+
+	response, _ := http.Get(gitUrl)
+	gitJson, _ := ioutil.ReadAll(response.Body)
+
+	github := GitHub{}
+	json.Unmarshal(gitJson, &github)
+	response.Body.Close()
+
+	stack.Watch = github.SubscribersCount
+	stack.Star = github.StargazersCount
+	stack.Fork = github.ForksCount
+
+	db.Conn.Save(&stack)
 }
 
 func UpdateView(slug string) {
@@ -98,4 +105,11 @@ func UpdateView(slug string) {
 
 	comparison.View = comparison.View + 1
 	db.Conn.Save(&comparison)
+
+	var stacks []models.Stack
+	db.Conn.Model(&comparison).Association("Stacks").Find(&stacks)
+	for i := 0; i < len(stacks); i++ {
+		stacks[i].View = stacks[i].View + 1
+		db.Conn.Save(&stacks[i])
+	}
 }

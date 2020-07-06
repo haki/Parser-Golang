@@ -9,6 +9,8 @@ type MainController struct {
 }
 
 func (c *MainController) Get() {
+	services.UpdateGitData()
+
 	c.Data["TopComparisons"] = services.TopComparisons()
 	c.Data["NewComparisons"] = services.NewComparisons()
 
@@ -24,8 +26,9 @@ func (c *MainController) DetailsPage() {
 	if !find {
 		c.Redirect("/", 303)
 	} else {
-		services.UpdateView(comparisonSlug)
+		c.Data["detail"] = true
 		c.Data["Comparison"] = services.ParseFromDatabase(comparisonSlug)
+		services.UpdateView(comparisonSlug)
 		c.TplName = "detailsPage.gohtml"
 	}
 }

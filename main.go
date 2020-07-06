@@ -61,4 +61,6 @@ func RegisterTemplateFuncs() {
 	beego.AddFuncMap("PreloadStackPros", utilities.PreloadStackPros)
 	beego.AddFuncMap("PreloadStackCons", utilities.PreloadStackCons)
 	beego.AddFuncMap("PreloadStackCompanies", utilities.PreloadStackCompanies)
+	beego.AddFuncMap("ChartData", utilities.ChartData)
+	beego.AddFuncMap("ChartLabels", utilities.ChartLabels)
 }

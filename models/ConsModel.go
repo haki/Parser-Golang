@@ -6,7 +6,7 @@ type Cons struct {
 	gorm.Model
 
 	Text    string `gorm:"type:varchar(250)"`
-	Point   int `gorm:"type:int"`
+	Point   int    `gorm:"type:int"`
 	Enabled bool
 	Stacks  Stack `gorm:"many2many:stack_cons"`
 }
