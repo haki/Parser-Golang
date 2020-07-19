@@ -235,21 +235,20 @@ func SetCompany(document *goquery.Document, name string, slug string) {
 	var stack models.Stack
 	db.Conn.Where(&models.Stack{Slug: slug}).First(&stack)
 
-	var text = "What companies use " + name + "?"
+	document.Find(".css-4pt7vy").Each(func(i int, firstDiv *goquery.Selection) {
+		var text = "What companies use " + name + "?"
+		if firstDiv.Find("h2").Text() == text {
+			firstDiv.Find(".css-7c9av6 .css-6nrkpz").Each(func(i int, selection *goquery.Selection) {
+				companyName := selection.Find(".css-mta8ak .css-rsz8c").Text()
+				companySlug, _ := selection.Find(".css-mta8ak").Attr("href")
+				companyImage, _ := selection.Find(".css-mta8ak .css-1pwtf47 span .css-4lwqz5").Attr("src")
 
-	document.Find("div.css-3vlw85").Each(func(i int, selection *goquery.Selection) {
-
-		if selection.Find("h2.css-nil").Text() == text {
-			selection.Find("ul.css-7c9av6 li").Each(func(n int, data *goquery.Selection) {
-
-				name := data.Find("div.css-mta8ak a.css-rsz8c").Text()
-				slug, _ := data.Find("div.css-mta8ak a.css-rsz8c").Attr("href")
-				image, _ := data.Find("div.css-mta8ak a.css-1pwtf47 span img").Attr("src")
-				if db.Conn.Where(&models.Company{Slug: slug}).First(&models.Company{}).Error != nil {
+				var company models.Company
+				if db.Conn.Where(&models.Company{Slug: companySlug}).First(&company).Error != nil {
 					company := models.Company{
-						Name:        name,
-						Slug:        slug,
-						Image:       image,
+						Name:        companyName,
+						Slug:        companySlug,
+						Image:       companyImage,
 						Website:     "",
 						Email:       "",
 						Github:      "",
@@ -259,17 +258,14 @@ func SetCompany(document *goquery.Document, name string, slug string) {
 						Country:     "",
 					}
 
-					if db.Conn.Where(&models.Company{Slug: slug}).First(&models.Company{}).Error == nil {
-						var optionalCompany models.Company
-						db.Conn.Where(&models.Company{Slug: slug}).First(&optionalCompany)
+					var optionalCompany models.Company
+					if db.Conn.Where(&models.Company{Slug: companySlug}).First(&optionalCompany).Error == nil {
 						db.Conn.Model(&stack).Association("Companies").Append(&optionalCompany)
 					} else {
 						db.Conn.Model(&stack).Association("Companies").Append(&company)
 					}
 
 				} else {
-					var company models.Company
-					db.Conn.Where(&models.Company{Slug: slug}).First(&company)
 					db.Conn.Model(&stack).Association("Companies").Append(&company)
 				}
 			})
